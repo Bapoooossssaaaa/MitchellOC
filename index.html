@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCiPnet Terminal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Caveat:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Courier Prime', 'Courier New', monospace;
+            background-color: #000;
+            color: #fff;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1f2937; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #7f1d1d; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #991b1b; 
+        }
+
+        .screen {
+            display: none;
+            width: 100%;
+            height: 100vh;
+            position: relative;
+            z-index: 20;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .tab-btn.active {
+            background-color: white;
+            color: #7f1d1d;
+        }
+        .tab-btn:not(.active) {
+            background-color: #e5e7eb;
+            color: #4b5563;
+        }
+        .tab-btn:not(.active):hover {
+            background-color: #d1d5db;
+        }
+
+        /* Journal Paper Effect */
+        .journal-paper {
+            background-color: #fdf6e3;
+            background-image: linear-gradient(#999 1px, transparent 1px);
+            background-size: 100% 2rem;
+            line-height: 2rem;
+            position: relative;
+            color: #2c3e50;
+        }
+        .handwritten {
+            font-family: 'Caveat', cursive;
+            font-size: 1.5rem;
+        }
+    </style>
+</head>
+<body class="w-full h-screen relative">
+    
+    <img src="https://github.com/Bapoooossssaaaa/CLASSIFIED/blob/main/Untitled%20design%20(6).gif?raw=true" class="absolute inset-0 w-full h-full object-cover z-0 opacity-50 pointer-events-none" alt="BG">
+
+    <img id="static-overlay" src="https://github.com/Bapoooossssaaaa/CLASSIFIED/blob/main/Untitled%20design%20(34).png?raw=true" class="absolute inset-0 w-full h-full object-cover z-10 opacity-80 pointer-events-none hidden" alt="Static">
+
+    <div id="modal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 hidden">
+        <div class="bg-white text-black border-4 border-red-800 w-full max-w-lg p-6 relative">
+            <button onclick="closeModal()" class="absolute top-2 right-4 text-2xl font-bold text-gray-400 hover:text-red-600">&times;</button>
+            <h3 id="modal-title" class="text-xl font-bold text-red-800 border-b-2 border-gray-300 mb-4 pb-2 uppercase"></h3>
+            <p id="modal-desc" class="text-lg leading-relaxed whitespace-pre-line font-mono"></p>
+        </div>
+    </div>
+
+    <div id="screen-boot" class="screen active flex-col items-center justify-center bg-black/90">
+        <img src="https://github.com/Bapoooossssaaaa/CLASSIFIED/blob/main/rac%20(9).png?raw=true" class="w-32 h-32 mb-8 animate-pulse" alt="Uplink">
+        <h1 class="text-3xl font-bold tracking-widest mb-6 text-white text-center">TERMINAL REMOTE UPLINK PROCESS</h1>
+        <div class="w-[400px] h-2 bg-gray-800 border border-white">
+            <div id="boot-bar" class="h-full bg-white transition-all duration-300 ease-linear" style="width: 0%"></div>
+        </div>
+        <div id="boot-text" class="mt-4 text-white tracking-widest">Initializing...</div>
+    </div>
+
+    <div id="screen-bios" class="screen flex-col justify-start items-start p-12 bg-black text-white">
+        <div class="max-w-4xl w-full">
+            <div id="bios-content" class="space-y-2 font-bold tracking-wide text-xl"></div>
+            <div class="w-3 h-5 bg-white mt-2 animate-pulse"></div>
+        </div>
+    </div>
+
+    <div id="screen-login" class="screen flex-col items-center justify-center">
+        <div class="absolute top-0 left-0 w-full h-12 flex items-center justify-between px-6 bg-red-900 border-b border-white text-white z-50 font-mono">
+            <div class="flex items-center tracking-widest font-bold">
+                <img src="https://github.com/Bapoooossssaaaa/CLASSIFIED/blob/main/rac%20(5).png?raw=true" class="h-8 w-8 mr-3" alt="logo">
+                SCiPnet SECURE GATEWAY
+            </div>
+            <div class="text-sm opacity-90">SECURE CONNECTION</div>
+        </div>
+
+        <div class="w-[800px] h-[550px] p-12 flex flex-col items-center relative z-20">
+            
+            <div class="flex flex-col items-center mb-6 w-full pb-4">
+                <img src="https://github.com/Bapoooossssaaaa/CLASSIFIED/blob/main/rac%20(5).png?raw=true" class="w-20 h-20 mb-2" alt="RAISA">
+                <h1 class="text-4xl font-bold tracking-widest text-white uppercase">SCiPnet</h1>
+                <p class="text-sm tracking-[0.4em] uppercase mt-1 text-gray-300">Secure Access Terminal</p>
+            </div>
+
+            <div class="w-full max-w-md space-y-4">
+                <div>
+                    <label class="block text-xs uppercase font-bold mb-1 tracking-widest text-gray-300">Personnel ID</label>
+                    <input type="text" id="login-user" readonly class="w-full bg-transparent border border-gray-400 p-3 text-lg font-bold text-white focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs uppercase font-bold mb-1 tracking-widest text-gray-300">Passphrase</label>
+                    <input type="password" id="login-pass" readonly class="w-full bg-transparent border border-gray-400 p-3 text-lg font-bold text-white focus:outline-none">
+                </div>
+                <button onclick="handleAuthorize()" id="auth-btn" class="w-full bg-white text-black font-bold py-3 text-xl tracking-[0.2em] hover:bg-gray-200 transition-colors mt-4 border border-gray-400 opacity-50 cursor-not-allowed" disabled>
+                    AUTHORIZE
+                </button>
+                <div id="auth-status" class="h-6 text-center text-white font-bold tracking-widest mt-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-db" class="screen flex-col items-center justify-center pt-12 bg-black/80">
+        <div class="absolute top-0 left-0 w-full h-12 flex items-center justify-between px-6 bg-red-900 border-b border-white text-white z-50 font-mono">
+            <div class="flex items-center tracking-widest font-bold">
+                <img src="https://github.com/Bapoooossssaaaa/CLASSIFIED/blob/main/rac%20(5).png?raw=true" class="h-8 w-8 mr-3" alt="logo">
+                OFFICE OF RAISA // PERSONNEL DOSSIER SHEET
+            </div>
+            <div class="text-sm opacity-90">SECURE CONNECTION</div>
+        </div>
+
+        <div class="w-[90%] h-[85%] bg-black border border-white flex flex-col shadow-2xl z-20">
+            <div class="bg-gray-900 border-b border-white p-4 flex justify-between items-center">
+                <div class="flex items-center gap-2 tracking-widest text-white"><i data-lucide="database" class="w-4 h-4"></i> DIRECTORY LISTING: /ROOT/RAISA/PERSONNEL/</div>
+                <div class="text-green-500 font-bold text-xs uppercase">Connected</div>
+            </div>
+
+            <div class="p-8 overflow-y-auto flex-1 grid grid-cols-1 gap-2" id="db-list">
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-file" class="screen flex-col bg-white text-black pt-12">
+        <div class="absolute top-0 left-0 w-full h-12 flex items-center justify-between px-6 bg-red-900 border-b border-white text-white z-50 font-mono">
+            <div class="flex items-center tracking-widest font-bold">
+                <img src="https://github.com/Bapoooossssaaaa/CLASSIFIED/blob/main/rac%20(5).png?raw=true" class="h-8 w-8 mr-3" alt="logo">
+                PERSONNEL DOSSIER VIEW
+            </div>
+            <div class="text-sm opacity-90">SECURE CONNECTION</div>
+        </div>
+
+        <div class="flex-1 flex overflow-hidden max-w-[1920px] mx-auto w-full border-x border-gray-300 z-20 bg-white">
+            <div class="w-80 bg-gray-100 border-r border-gray-300 p-6 flex flex-col items-center overflow-y-auto shrink-0">
+                <div class="w-full aspect-[3/4] bg-gray-300 mb-4 border-4 border-black relative">
+                    <img src="https://github.com/Bapoooossssaaaa/MitchellOC/blob/main/Screenshot%202026-01-10%20235941.png?raw=true" class="w-full h-full object-cover" alt="Sullivan">
+                    <div class="absolute bottom-0 w-full bg-red-800 text-white text-center text-xs font-bold py-1">CLASSIFIED</div>
+                </div>
+                <h2 class="text-2xl font-bold uppercase tracking-tighter mb-1">M. Sullivan</h2>
+                <div class="bg-gray-900 text-white text-xs font-bold py-1 px-4 w-full mb-8 text-center uppercase">Senior Investigator</div>
+                
+                <div class="w-full text-left space-y-2 text-xs font-mono border-t border-gray-300 pt-4">
+                    <p><strong>NAME:</strong> Mitchell Sullivan</p>
+                    <p><strong>ALIAS:</strong> "Negligence"</p>
+                    <p><strong>DOB:</strong> Aug 14, 1987</p>
+                    <p><strong>CLEARANCE:</strong> [CL-III]</p>
+                </div>
+            </div>
+
+            <div class="flex-1 flex flex-col bg-white relative">
+                <img src="https://github.com/Bapoooossssaaaa/Kael-Nicholas-Charles-OC/blob/main/Logo_of_the_SCP_Foundation.png?raw=true" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] opacity-10 pointer-events-none grayscale" alt="watermark">
+
+                <div class="flex border-b border-red-800 bg-gray-200 overflow-x-auto relative z-10" id="tabs-container">
+                    <button onclick="openTab('overview')" class="tab-btn active px-6 py-3 text-sm font-bold uppercase tracking-wide border-r border-gray-300 whitespace-nowrap">Overview</button>
+                    <button onclick="openTab('backstory')" class="tab-btn px-6 py-3 text-sm font-bold uppercase tracking-wide border-r border-gray-300 whitespace-nowrap">Backstory</button>
+                    <button onclick="openTab('interview')" class="tab-btn px-6 py-3 text-sm font-bold uppercase tracking-wide border-r border-gray-300 whitespace-nowrap">Interview</button>
+                    <button onclick="openTab('service')" class="tab-btn px-6 py-3 text-sm font-bold uppercase tracking-wide border-r border-gray-300 whitespace-nowrap">Service Record</button>
+                    <button onclick="openTab('ir4001')" class="tab-btn px-6 py-3 text-sm font-bold uppercase tracking-wide border-r border-gray-300 whitespace-nowrap">IR-4001</button>
+                    <button onclick="openTab('journal')" class="tab-btn px-6 py-3 text-sm font-bold uppercase tracking-wide border-r border-gray-300 whitespace-nowrap">Journal</button>
+                    <button onclick="openTab('morph')" class="tab-btn px-6 py-3 text-sm font-bold uppercase tracking-wide border-r border-gray-300 whitespace-nowrap">Morph</button>
+                </div>
+
+                <div id="tab-content" class="flex-1 overflow-y-auto p-10 font-sans text-gray-900 leading-relaxed text-sm relative z-10">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <template id="tpl-overview">
+        <div>
+            <div class="flex items-center gap-6 mb-6 pb-6 border-b-2 border-red-900">
+                <img src="https://github.com/Bapoooossssaaaa/CLASSIFIED/blob/main/rac%20(5).png?raw=true" class="h-24 w-24 object-contain" alt="RAISA Logo">
+                <div>
+                    <h1 class="text-3xl font-bold text-red-900 uppercase">[Internal Investigations Dept.]</h1>
+                    <h2 class="text-xl font-bold text-black uppercase mt-1">Senior Investigator</h2>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div>
+                    <h3 class="font-bold border-b border-gray-400 mb-2">Core Identity</h3>
+                    <div class="grid grid-cols-[180px_1fr] gap-2 bg-gray-100 border border-gray-400 p-4 mb-4 text-sm font-mono text-black">
+                        <div class="font-bold text-gray-800 text-right pr-4 uppercase border-r border-gray-400">Name</div><div class="pl-2">Mitchell Sullivan</div>
+                        <div class="font-bold text-gray-800 text-right pr-4 uppercase border-r border-gray-400">Alias</div><div class="pl-2">"Negligence"</div>
+                        <div class="font-bold text-gray-800 text-right pr-4 uppercase border-r border-gray-400">Alignment</div><div class="pl-2">Foundation Loyal / Hostile Alignment</div>
+                        <div class="font-bold text-gray-800 text-right pr-4 uppercase border-r border-gray-400">Role</div><div class="pl-2">Senior Investigator</div>
+                        <div class="font-bold text-gray-800 text-right pr-4 uppercase border-r border-gray-400">Clearance</div><div class="pl-2">[CL-III]</div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-bold border-b border-gray-400 mb-2">Psychological Profile</h3>
+                    <div class="grid grid-cols-[180px_1fr] gap-2 bg-gray-100 border border-gray-400 p-4 mb-4 text-sm font-mono text-black">
+                        <div class="font-bold text-gray-800 text-right pr-4 uppercase border-r border-gray-400">Disposition</div><div class="pl-2">Charming, Casual</div>
+                        <div class="font-bold text-gray-800 text-right pr-4 uppercase border-r border-gray-400">Disorder</div><div class="pl-2">Intermittent Explosive (Managed)</div>
+                        <div class="font-bold text-gray-800 text-right pr-4 uppercase border-r border-gray-400">Age</div><div class="pl-2">38</div>
+                        <div class="font-bold text-gray-800 text-right pr-4 uppercase border-r border-gray-400">Education</div><div class="pl-2">B.S. Criminology</div>
+                        <div class="font-bold text-gray-800 text-right pr-4 uppercase border-r border-gray-400">Origin</div><div class="pl-2">Springfield, MO</div>
+                        <div class="font-bold text-gray-800 text-right pr-4 uppercase border-r border-gray-400">Status</div><div class="pl-2">Active Duty</div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="font-bold border-b border-gray-400 mb-4 mt-8 uppercase">Standard Issue Gear</h3>
+            <div class="flex flex-wrap gap-2">
+                <button onclick="showModal('Level-3 Keycard', 'Standard issue keycard granting access to Level-3 security sectors for inquiry purposes.')" class="bg-gray-800 text-white px-4 py-2 text-sm font-bold uppercase hover:bg-black transition-colors">Level-3 Keycard</button>
+                <button onclick="showModal('Clipboard', 'A heavy-duty clipboard containing incident reports, evidence logs, and forensic analysis sheets.')" class="bg-gray-800 text-white px-4 py-2 text-sm font-bold uppercase hover:bg-black transition-colors">Clipboard</button>
+                <button onclick="showModal('Coffee', 'Black. Two sugars. Essential for long shifts.')" class="bg-gray-800 text-white px-4 py-2 text-sm font-bold uppercase hover:bg-black transition-colors">Coffee</button>
+                <button onclick="showModal('M9 Pistol', 'Standard-Issue Foundation Pistol for self-defense purposes.')" class="bg-gray-800 text-white px-4 py-2 text-sm font-bold uppercase hover:bg-black transition-colors">M9 Pistol</button>
+                <button onclick="showModal('Knife', '(This is to be used for killings in discreet.)')" class="bg-gray-800 text-white px-4 py-2 text-sm font-bold uppercase hover:bg-black transition-colors">Knife</button>
+            </div>
+
+            <h3 class="font-bold border-b border-gray-400 mb-4 mt-8 uppercase">OORP Perks</h3>
+            <div class="flex flex-wrap gap-2">
+                <button onclick="showModal('Permcanrk / Rebellious Team', 'Considering my OC is &quot;secretly&quot; a murderer, this is a given.')" class="bg-red-900 text-white px-4 py-2 text-sm font-bold uppercase hover:bg-black transition-colors">Permcanrk / Rebellious Personnel Team</button>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-backstory">
+        <div class="space-y-6 text-justify">
+            <h2 class="text-xl font-bold text-gray-800 border-b-2 border-gray-300 pb-2">Biographical History</h2>
+            <p>Mitchell Sullivan was born on <span class="bg-yellow-200 px-1 font-bold">August 14, 1987</span>, in Springfield, Missouri, USA, to Patrick and Deborah Sullivan. Mitchell was known as a laid-back, charming, and casual young man, always projecting an attitude that gave people a good reason to like him. His parents adored his early aptitude for respect and kindness, as he always tried to see the good in the world. As he grew, that attitude never changed; however, he began to exhibit intermittent signs of rage. These issues would sometimes burst out despite his best efforts to suppress them. This first got him into trouble in middle school when he punched a student for shoving him during lunch. The principal, seeing Mitchell’s usually kind demeanor, let him off the hook. His father, however, frowned upon the incident, as he did not view his son as a violent child and was shocked by such an act from a well-mannered kid.</p>
+            <p>Mitchell attended Glendale High School in Springfield, MO, starting in August of 2001. He enjoyed a seemingly good four years, avoiding further incidents until his senior year. During that year, he witnessed a student push his best friend and beat him down. Mitchell approached the aggressor during free time and stabbed him in the ribs with a pencil. This resulted in Mitchell being severely beaten in return. The school decided only to suspend Mitchell, citing his age (17) and the disparity in physical condition between him and the larger student. Realizing he wasn’t as strong as he thought, and with his father’s encouragement, Mitchell dedicated himself to the gym. He gained a significant amount of muscle by the winter following his graduation in May of 2005. Despite his record, he managed to secure a spot at the University of Missouri-St. Louis. By 2009, he received a B.S. in Criminology & Criminal Justice and a minor in Forensic Psychology.</p>
+            
+            <h2 class="text-xl font-bold text-gray-800 mt-6 border-b border-gray-300 pb-1">Pre-Foundation Career & Incident</h2>
+            <p>Soon after college, he landed a job at the St. Louis Metropolitan Police Department in the Crime Scene Unit (CSU) as a Forensic Technician, serving from 2010 until his termination in 2015. During the investigation of a homicide scene in North St. Louis, a bystander breached the perimeter and began verbally harassing the officers present, referring to Mitchell and his colleagues as “Pigs” and threatening their families. According to police reports, Mitchell snapped. He tackled the civilian and began beating him, delivering severe blunt force trauma to the individual's cranial and facial regions. The assault continued for 45 seconds before three of his colleagues were able to pull him off and restrain him. The victim survived but required significant reconstructive surgery.</p>
+            <p>Sullivan was immediately suspended and subsequently terminated. Following the assault, the victim pressed charges, but Sullivan managed to avoid prison via a plea deal citing temporary insanity and extreme emotional distress. He was remanded to Hawthorn Psychiatric Hospital in St. Louis in November of 2015. There, he was diagnosed with Managed Intermittent Explosive Disorder and Acute Stress Reaction. He was released in February of 2017.</p>
+
+            <h2 class="text-xl font-bold text-gray-800 mt-6 border-b border-gray-300 pb-1">Recruitment</h2>
+            <p>While at home in his apartment in June of 2017, he found a job flyer in his mailbox for “Mainline Security & Logistics,” a Foundation front company. The flyer advertised a Security Contractor position. He submitted an application and was directed to an undisclosed location in an abandoned parking lot. Upon arrival, Foundation agents tranquilized him and took him into custody, placing him in a briefing room. He woke up shortly thereafter, disoriented, in front of a Foundation Recruiter.</p>
+        </div>
+    </template>
+
+    <template id="tpl-service">
+        <div class="space-y-6 text-justify">
+            <h2 class="text-xl font-bold text-red-900 border-b-2 border-red-900 pb-2">Foundation Service Record</h2>
+            <p>During the Foundation background check, records were found pertaining to the civilian incident in 2015. It was deemed that he was ill-suited for a standard security position. Further investigation noted his employment as a CSU technician, leading to his referral to the IID. He accepted this change of work happily.</p>
+            <p>During his employment within the IID, Mitchell has stopped <span class="bg-red-100 font-bold px-1 text-red-900">11 different rogue personnel</span>. Three of these individuals were believed to have committed suicide before the Foundation could apprehend them, according to Mitchell’s statements. Mitchell has been promoted twice: to Investigator in 2019, and to Senior Investigator in 2023. He is well-regarded in the department for his charming, casual personality and strong work ethic.</p>
+            <div class="border-l-4 border-red-600 pl-4 py-2 bg-red-50 italic text-gray-700">
+                <strong class="block text-red-900 not-italic">INCIDENT REPORT: DISCIPLINARY</strong>
+                However, colleagues have noticed lingering emotional instability. During one investigation, he nearly killed a Chaos Insurgency sleeper agent who had murdered an innocent Senior Researcher. Sullivan was stopped by Security Agents moments before the kill. While in the medical wing, he stated that he "saw red," apologizing and claiming loss of control. He was released after a week of psychiatric rest.
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-interview">
+        <div class="bg-black text-white p-12 h-full overflow-y-auto" style="font-family: 'Courier New', Courier, monospace; font-size: 1.25rem;">
+            <div class="space-y-6">
+                <p><strong class="text-gray-500">IO:</strong> “Hello, Mr. Sullivan.”</p>
+                <p><strong class="text-blue-400">MS:</strong> (Disoriented) “Who are you…? Where am I?”</p>
+                <p><strong class="text-gray-500">IO:</strong> “I understand you applied for the job of a Security Contractor for Mainline Security & Logistics?”</p>
+                <p><strong class="text-blue-400">MS:</strong> “Yes? Is that who you are?”</p>
+                <p><strong class="text-gray-500">IO:</strong> “Yes and no. That was just a front company for the Foundation to hire Security Department agents. We are the SCP Foundation.”</p>
+                <p><strong class="text-blue-400">MS:</strong> “The... SCP Foundation? Okay… Why the hell did you sedate me?!”</p>
+                <p><strong class="text-gray-500">IO:</strong> “Apologies. We do that in order to protect the veil of secrecy. We don’t need an outsider knowing how to get to the Foundation if you were to, say, escape custody or decline the offer.”</p>
+                <p><strong class="text-blue-400">MS:</strong> “Understandable... But uh, you're hiring for Security?”</p>
+                <p><strong class="text-gray-500">IO:</strong> “Yes. However, we read your file and believe you would be a better fit somewhere different... due to past circumstances.”</p>
+                <p><strong class="text-blue-400">MS:</strong> “Ah yes... The incident... Please know I'm a changed man.”</p>
+                <p><strong class="text-gray-500">IO:</strong> “That may be truthful, but we can’t take any risks. However, we have found a perfect vacant position for you.”</p>
+                <p><strong class="text-blue-400">MS:</strong> “I see. What position?”</p>
+                <p><strong class="text-gray-500">IO:</strong> ”Given your record, I see a future for you in the IID—the Internal Investigations Department. You’ll be responsible for internal inquiries. Given your expertise in Crime Scene Investigation, I take it that will not be an issue for you?”</p>
+                <p><strong class="text-blue-400">MS:</strong> “Absolutely not, sir.”</p>
+                <p><strong class="text-gray-500">IO:</strong> “Good, good. I’ll have somebody from HR get you an ID and uniform. Good luck on your assignment.”</p>
+                <p><strong class="text-blue-400">MS:</strong> “Thank you kindly.”</p>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-journal">
+        <div class="h-full relative shadow-lg overflow-hidden journal-paper p-8">
+            <img src="https://github.com/Bapoooossssaaaa/MitchellOC/blob/main/blood-splatter-on-a-transparent-background-showcasing-vibrant-red-tones-and-chaotic-patterns-blood-splatter-on-transparent-background-free-png.webp?raw=true" class="absolute top-12 right-0 w-[500px] opacity-75 pointer-events-none rotate-12 z-0 mix-blend-multiply" alt="blood">
+            
+            <div class="relative z-10 handwritten space-y-4">
+                <h2 class="text-2xl font-bold underline mb-6">Hidden Journal [LABEL: MS]</h2>
+                <p>I am not who they think I am. I am not a nice guy. I am not a normal person.</p>
+                <p>To the people of the IID, I’m “Mitch.” The guy who brings you coffee and donuts as a friendly gesture. The guy who is always hardworking and respectful. The guy who laughs at the Head of Department’s terribly written jokes just to make him feel better about himself.</p>
+                <p>But I am not Mitch. Mitch is merely a friendly mask I wear for the people around me, and God, is it exhausting. Every smile, every laugh, every sarcastic joke. It’s hard to keep the real me suppressed, even for a little while.</p>
+                <p>That ‘incident’ in 2015 wasn’t just an emotional outbreak. It was the REAL me. The only time in my life I felt happy, the only time in my life I felt pure ecstasy. I was truly alive. I should have killed that man for what he was saying. We found out later that he had killed a girl barely over the age of 16 just for the pleasure of it. I don’t claim to know the future, but I know bad men. And there’s a whole lot of them in this cruel, cold world. Maybe you’d say I’m one of them. Maybe you’d call my work disgusting. But I am who I am.</p>
+                <p>Those three men didn’t commit suicide, despite the report. I killed them in cold blood. Why? Well... most of them were killers themselves, and I think one less monster in the world is a good deed most justice can’t serve.</p>
+                <p>To anyone who finds this: You can label me a murderous, psychopathic, and cold monster. But the truth is... I was better than most. I had standards. I had a code. I had a reason for killing: Justice.</p>
+                <p class="mt-8 text-right font-bold text-3xl">And that is what helps me sleep at night.</p>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-morph">
+        <div class="space-y-8">
+            <h2 class="text-xl font-bold text-gray-800 border-b-2 border-gray-300 pb-2 mb-6">Morph Configuration</h2>
+            
+            <div class="flex border border-gray-300 bg-gray-50 p-4">
+                <div class="w-48 flex-shrink-0 border-2 border-gray-400 bg-gray-200 flex items-center justify-center">
+                    <img src="https://github.com/Bapoooossssaaaa/MitchellOC/blob/main/Screenshot%202026-01-10%20235941.png?raw=true" alt="Morph" class="w-full h-full object-cover">
+                </div>
+                <div class="flex-1 ml-6 relative">
+                    <h3 class="font-bold text-lg mb-2 text-red-900 border-b border-gray-300">MAIN LOADOUT</h3>
+                    <pre class="bg-black text-white p-4 text-xs font-mono overflow-x-auto whitespace-pre-wrap h-64">run
+team Waltbo215 'Whitelisted Personnel' &
+permhat Waltbo215 11922435004,118408289426222,14775695887,119815505333561,110630828043746,130608567113311 &
+permshirt Waltbo215 73776186510266 6937192922 &
+permntag Waltbo215 &lt;font face='Code'&gt;Mitchell S.&lt;/font&gt; &
+permrtag Waltbo215 &lt;font face='Code'&gt;Internal Investigations Department, Senior Investigator&lt;br/&gt;NF-WLOC&lt;/font&gt; &
+permcntag Waltbo215 255 255 255 &
+permcrtag Waltbo215 155 77 77 &
+permmaxhealth Waltbo215 120 &
+startergear Waltbo215 L3,M9,coffee,clipboard,knife,radio &
+permcanrk Waltbo215 true</pre>
+                    <button onclick="copyToClipboard(this, `run\nteam Waltbo215 'Whitelisted Personnel' &\npermhat Waltbo215 11922435004,118408289426222,14775695887,119815505333561,110630828043746,130608567113311 &\npermshirt Waltbo215 73776186510266 6937192922 &\npermntag Waltbo215 <font face='Code'>Mitchell S.</font> &\npermrtag Waltbo215 <font face='Code'>Internal Investigations Department, Senior Investigator<br/>NF-WLOC</font> &\npermcntag Waltbo215 255 255 255 &\npermcrtag Waltbo215 155 77 77 &\npermmaxhealth Waltbo215 120 &\nstartergear Waltbo215 L3,M9,coffee,clipboard,knife,radio &\npermcanrk Waltbo215 true`)" class="absolute top-0 right-0 flex items-center px-3 py-1 text-xs font-bold uppercase bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors">
+                        <i data-lucide="copy" class="w-3 h-3 mr-1"></i> COPY
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-ir4001">
+        <div class="border-4 double border-red-900 p-8 text-center bg-gray-50">
+            <h1 class="text-3xl font-bold tracking-[0.2em] mb-4">INCIDENT REPORT IR-4001</h1>
+            <div class="border-2 border-red-600 text-red-600 font-bold inline-block px-4 py-1 mb-6 -rotate-2">STATUS: UNCHANGED</div>
+            <p class="text-left font-mono">
+                IR-4001 has not appeared to result in significant changes to his mental state, suggesting he has not suffered loss in the same way many other personnel have. Although some of his colleagues were pronounced MIA from the department, this does not seem to affect him significantly.
+            </p>
+        </div>
+    </template>
+
+    <script>
+        const screens = ['boot', 'bios', 'login', 'db', 'auth', 'file'];
+
+        function switchScreen(id) {
+            document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+            document.getElementById(`screen-${id}`).classList.add('active');
+            lucide.createIcons();
+        }
+
+        function runBoot() {
+            const bar = document.getElementById('boot-bar');
+            const text = document.getElementById('boot-text');
+            
+            setTimeout(() => { bar.style.width = '10%'; text.innerText = "Initializing Hardware..."; }, 1500);
+            setTimeout(() => { bar.style.width = '40%'; text.innerText = "Verifying Handshake..."; }, 3500);
+            setTimeout(() => { bar.style.width = '70%'; text.innerText = "Establishing Secure Tunnel..."; }, 6000);
+            setTimeout(() => { bar.style.width = '100%'; text.innerText = "Connected."; }, 8000);
+            setTimeout(() => { switchScreen('bios'); runBios(); }, 9500);
+        }
+
+        function runBios() {
+            const lines = [
+                "SCiPnet BIOS v5.4.1 (Build 9924)",
+                "Copyright (c) 2025 Foundation Systems",
+                "Initializing Kernel...",
+                "Checking RAM... OK",
+                "Verifying Hardware Signatures... OK",
+                "Mounting Secure Volume [IID-ARCHIVE]... OK",
+                "Bypassing Local Firewalls... DONE",
+                "Loading Encryption Modules (AES-4096)... SUCCESS",
+                "Establishing Uplink to Node [SITE-LOGISTICS]...",
+                "Handshake Protocol: ENCRYPTED",
+                "Biometric Scan Required...",
+                "System Ready."
+            ];
+            const container = document.getElementById('bios-content');
+            let delay = 0;
+
+            lines.forEach(line => {
+                delay += Math.random() * 500 + 200;
+                setTimeout(() => {
+                    const div = document.createElement('div');
+                    div.innerHTML = `<span class="opacity-50 mr-2">&gt;</span>${line}`;
+                    container.appendChild(div);
+                }, delay);
+            });
+
+            setTimeout(() => {
+                switchScreen('login');
+                document.getElementById('static-overlay').classList.remove('hidden');
+                runLoginType();
+            }, delay + 2000);
+        }
+
+        function runLoginType() {
+            const userIn = document.getElementById('login-user');
+            const passIn = document.getElementById('login-pass');
+            const btn = document.getElementById('auth-btn');
+            
+            setTimeout(() => {
+                const user = "IID_DIRECTOR_AUTH";
+                let i = 0;
+                const typeUser = setInterval(() => {
+                    userIn.value += user.charAt(i);
+                    i++;
+                    if (i >= user.length) clearInterval(typeUser);
+                }, 100);
+            }, 1000);
+
+            setTimeout(() => {
+                const pass = "*********";
+                let j = 0;
+                const typePass = setInterval(() => {
+                    passIn.value += pass.charAt(j);
+                    j++;
+                    if (j >= pass.length) clearInterval(typePass);
+                }, 100);
+            }, 3500);
+
+            setTimeout(() => {
+                document.getElementById('auth-status').innerText = "WAITING FOR AUTHORIZATION...";
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }, 5000);
+        }
+
+        function handleAuthorize() {
+            const status = document.getElementById('auth-status');
+            status.innerText = "AUTHENTICATING...";
+            status.classList.add('animate-pulse', 'text-yellow-400');
+            setTimeout(() => {
+                document.getElementById('static-overlay').classList.add('hidden');
+                switchScreen('db');
+                renderDbList();
+            }, 2500);
+        }
+
+        function renderDbList() {
+            const list = document.getElementById('db-list');
+            list.innerHTML = '';
+            
+            // Top corrupted files
+            for(let i=0; i<6; i++) {
+                const div = document.createElement('div');
+                div.className = "flex justify-between p-4 border border-gray-700 bg-gray-800 text-gray-500 cursor-not-allowed";
+                div.innerHTML = `
+                    <span class="flex items-center gap-4"><i data-lucide="file-text" class="w-4 h-4"></i> FILE_CORRUPTED_${1000+i}.tmp</span>
+                    <span class="text-xs uppercase">[UNREADABLE]</span>
+                `;
+                list.appendChild(div);
+            }
+
+            // Active File
+            const active = document.createElement('div');
+            active.className = "flex justify-between p-4 border border-yellow-500 bg-yellow-900/20 text-yellow-500 cursor-pointer hover:bg-yellow-900/40 hover:pl-6 transition-all";
+            active.innerHTML = `
+                <div class="flex items-center gap-4 font-bold tracking-widest">
+                    <i data-lucide="lock" class="w-4 h-4"></i>
+                    PERSONNEL DOSSIER: "M. SULLIVAN"
+                </div>
+                <span class="border border-yellow-500 px-2 text-xs font-bold">[CL-III CLEARANCE REQ]</span>
+            `;
+            active.addEventListener('click', () => {
+                // No PIN required for this file
+                switchScreen('file');
+            });
+            list.appendChild(active);
+
+            // Bottom logs
+            for(let i=0; i<8; i++) {
+                const div = document.createElement('div');
+                div.className = "flex justify-between p-4 border border-gray-700 bg-gray-800 text-gray-500 cursor-not-allowed";
+                div.innerHTML = `
+                    <span class="flex items-center gap-4"><i data-lucide="file-text" class="w-4 h-4"></i> SYS_LOG_${8000+i}.log</span>
+                    <span class="text-xs uppercase">[ARCHIVED]</span>
+                `;
+                list.appendChild(div);
+            }
+            
+            lucide.createIcons();
+        }
+
+        function openTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                if (btn.onclick.toString().includes(tabName)) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            const template = document.getElementById(`tpl-${tabName}`);
+            const contentArea = document.getElementById('tab-content');
+            if(template) {
+                contentArea.innerHTML = template.innerHTML;
+                lucide.createIcons();
+            }
+        }
+
+        function showModal(title, desc) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-desc').innerText = desc;
+            document.getElementById('modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.add('hidden');
+        }
+
+        function copyToClipboard(btn, text) {
+            const el = document.createElement('textarea');
+            el.value = text;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+
+            const origContent = btn.innerHTML;
+            btn.innerHTML = `<i data-lucide="check-circle" class="w-3 h-3 mr-1"></i> COPIED`;
+            btn.classList.remove('bg-gray-200', 'text-gray-700');
+            btn.classList.add('bg-green-600', 'text-white');
+            lucide.createIcons();
+
+            setTimeout(() => {
+                btn.innerHTML = origContent;
+                btn.classList.add('bg-gray-200', 'text-gray-700');
+                btn.classList.remove('bg-green-600', 'text-white');
+                lucide.createIcons();
+            }, 2000);
+        }
+
+        window.onload = function() {
+            runBoot();
+            openTab('overview');
+            lucide.createIcons();
+        }
+
+    </script>
+</body>
+</html>
